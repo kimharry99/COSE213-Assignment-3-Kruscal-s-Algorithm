@@ -19,6 +19,7 @@
 구현을 하고 전역변수를 줄이기
 구현 순서 
 * TODO : 
+addEdge
 inputGraph
 printGraph
 initializeOutputGraph
@@ -71,12 +72,15 @@ void initializeOutputGraph();
 void sortEdge();
 /*	add edge to output graph.
 	return 1 : adding success, return 0 : adding failure */
-int addEdge(edge);
+int addEdge(edge,int);
 void KrusklsAlgorithm();
 void inputGraph();
 void printGraph();
 /* handle not integer exceptions and out of range exception. */
-int goodScanf(int,int);
+int goodInput(int,int);
+/*	return 1 edge(int,int) is already in the graph
+	return 0 other case	*/
+int isExist(int, int);
 
 int main() {
 	/*inputGraph();
@@ -121,8 +125,14 @@ void sortEdge() {
 
 }
 
-int addEdge(edge _edge) {
-
+int addEdge(edge _edge, int x) {
+	/*	read the information of _edge and make new node then add to adjcent list */
+	nodePointer w;
+	/* Add edge to InputGraph */
+	if (x == 0) {
+		/* search end of the list */
+		for (w = arrInputAdjList[_edge.head]; ; w->link != NULL);
+	}
 }
 
 void KrusklsAlgorithm() {
@@ -135,7 +145,7 @@ void KrusklsAlgorithm() {
 	*/
 }
 
-int goodScanf(int rangeA, int rangeB) {
+int goodInput(int rangeA, int rangeB) {
 	/* good range = [rangeA, rangeB] */
 	int n;
 	if (scanf("%d", &n));
@@ -169,13 +179,10 @@ void inputGraph() {
 	*	out of range (good range = [1,MAX_ELEMENTS])
 	*/
 	printf("input number of vertex>>");
-	if (!scanf("%d", &n)) {
-
-	}
-
+	n = goodInput(1, MAX_ELEMENTS);
 
 	/*
-	* input edges : head and tail and weight 
+	* input edges : tail, head and weight 
 	* need an end signal (maybe enter -1 at first data)
 	* exceptions
 	*	input wrong tail 
@@ -191,6 +198,24 @@ void inputGraph() {
 	*		out of range (good range = [0,∞)) 
 	*/
 
+	while (1) {
+		edge temp;
+		printf("Input tail of edge>>");
+		temp.tail = goodInput(0,MAX_ELEMENTS);
+		printf("Input head of edge >>");
+		temp.head = goodInput(0, MAX_ELEMENTS);
+		if (temp.head == temp.tail) {
+			printf("tail and head is same");
+			exit(EXIT_FAILURE);
+		}
+		if (isExist(temp.tail, temp.head)) {
+			printf("the edge is already exist");
+			exit(EXIT_FAILURE);
+		}
+		printf("Input weight of edge >>");
+		temp.weight = goodInput(0, 10000);
+		addEdge(temp);
+	}
 	/* make adjecentList */
 
 	/*	exceptions 
@@ -200,4 +225,17 @@ void inputGraph() {
 
 void printGraph() {
 
+}
+
+int isExist(int _tail, int _head) {
+	return 0;
+}
+
+void dfs(int v, int* visited){ 
+	/* depth first search of a graph beginning at v */
+	nodePointer w;
+	visited[v] = 1;
+	for (w = graph[v]; w; w = w->link)
+		if (!visited[w->vertex])
+			dfs(w->vertex); /* recursion */
 }
