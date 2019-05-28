@@ -48,7 +48,8 @@ typedef struct _node {
 
 /* global variables */
 
-nodePointer arrInputAdjList[MAX_ELEMENTS], arrOutputAdjList[MAX_ELEMENTS];
+/* 0 : input graph, 1 : output graph */
+nodePointer arrAdjList[2][MAX_ELEMENTS] = { NULL, };
 /* use for examining that any cycle is created in the graph. */
 int arrResultVertexParent[MAX_ELEMENTS] = { -1, }; 
 /* use for ascending sorting of edge weights */
@@ -78,9 +79,8 @@ void inputGraph();
 void printGraph();
 /* handle not integer exceptions and out of range exception. */
 int goodInput(int,int);
-/*	return 1 edge(int,int) is already in the graph
-	return 0 other case	*/
-int isExist(int, int);
+
+
 
 int main() {
 	/*inputGraph();
@@ -89,6 +89,8 @@ int main() {
 	KrusklsAlgorithm();
 	printGraph();
 	*/
+
+	inputGraph();
 	return 0;
 }
 
@@ -127,11 +129,55 @@ void sortEdge() {
 
 int addEdge(edge _edge, int x) {
 	/*	read the information of _edge and make new node then add to adjcent list */
-	nodePointer w;
-	/* Add edge to InputGraph */
-	if (x == 0) {
-		/* search end of the list */
-		for (w = arrInputAdjList[_edge.head]; ; w->link != NULL);
+	nodePointer w,temp;
+	if (x == 0 || x == 1) {
+		if (arrAdjList[x][_edge.tail] == NULL) {
+			temp = (nodePointer)malloc(sizeof(node));
+			temp->link = NULL;
+			temp->weight = _edge.weight;
+			temp->vertex = _edge.head;
+			arrAdjList[x][_edge.tail] = temp;
+		}
+		else {
+			for (w = arrAdjList[x][_edge.tail]; w->link != NULL; w = w->link)
+				if (w->vertex == _edge.head)
+					/* edge is already in the graph */
+					return 0;
+			if (w->vertex == _edge.head)
+					/* edge is already in the graph */
+					return 0;
+			temp = (nodePointer)malloc(sizeof(node));
+			temp->link = NULL;
+			temp->weight = _edge.weight;
+			temp->vertex = _edge.head;
+			w->link = temp;
+		}
+		if (arrAdjList[x][_edge.head] == NULL) {
+			temp = (nodePointer)malloc(sizeof(node));
+			temp->link = NULL;
+			temp->weight = _edge.weight;
+			temp->vertex = _edge.tail;
+			arrAdjList[x][_edge.head] = temp;
+		}
+		else {
+			/* search end of the list */
+			for (w = arrAdjList[x][_edge.head]; w->link != NULL; w = w->link)
+				/* edge is already in the graph */
+				if (w->vertex == _edge.tail)
+					return 0;
+			if (w->vertex == _edge.tail)
+					/* edge is already in the graph */
+					return 0;
+			temp = (nodePointer)malloc(sizeof(node));
+			temp->link = NULL;
+			temp->weight = _edge.weight;
+			temp->vertex = _edge.tail;
+			w->link = temp;
+		}
+	}
+	else {
+		printf("add Edge error.(wrong parameter x)");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -180,62 +226,63 @@ void inputGraph() {
 	*/
 	printf("input number of vertex>>");
 	n = goodInput(1, MAX_ELEMENTS);
+	/*for (int i = 0; i < n; i++) {
+		arrAdjList[0][i]=NULL;
+	}*/
 
 	/*
-	* input edges : tail, head and weight 
+	* input edges : tail, head and weight
 	* need an end signal (maybe enter -1 at first data)
 	* exceptions
-	*	input wrong tail 
+	*	input wrong tail
 	*		not integer
 	*		out of range(good range = [0,number of vertexes))
-	*	input wrong head 
+	*	input wrong head
 	*		not integer
 	*		out of range(good range = [0,number of vertexes))
 	*		same with tail
 	*		already exsited
 	*	input wrong weight
 	*		not integer
-	*		out of range (good range = [0,¡Ä)) 
+	*		out of range (good range = [0,¡Ä))
 	*/
 
 	while (1) {
 		edge temp;
-		printf("Input tail of edge>>");
-		temp.tail = goodInput(0,MAX_ELEMENTS);
-		printf("Input head of edge >>");
+		printf("Input tail of edge   >>");
+		temp.tail = goodInput(-1, MAX_ELEMENTS);
+		if (temp.tail == -1)
+			break;
+		printf("Input head of edge   >>");
 		temp.head = goodInput(0, MAX_ELEMENTS);
 		if (temp.head == temp.tail) {
 			printf("tail and head is same");
 			exit(EXIT_FAILURE);
 		}
-		if (isExist(temp.tail, temp.head)) {
-			printf("the edge is already exist");
-			exit(EXIT_FAILURE);
-		}
 		printf("Input weight of edge >>");
 		temp.weight = goodInput(0, 10000);
-		addEdge(temp);
-	}
-	/* make adjecentList */
+		/* make adjecentList */
+		if (!addEdge(temp, 0)) {
+			printf("edge is already exist.");
+			exit(EXIT_FAILURE);
+		}
 
-	/*	exceptions 
-	*		graph is not connected 
-	*/
+		/*	exceptions
+		*		graph is not connected
+		*/
+	}
 }
 
 void printGraph() {
 
 }
 
-int isExist(int _tail, int _head) {
-	return 0;
-}
 
 void dfs(int v, int* visited){ 
 	/* depth first search of a graph beginning at v */
 	nodePointer w;
 	visited[v] = 1;
-	for (w = graph[v]; w; w = w->link)
-		if (!visited[w->vertex])
-			dfs(w->vertex); /* recursion */
+//	for (w = graph[v]; w; w = w->link)
+	//	if (!visited[w->vertex])
+		//	dfs(w->vertex); /* recursion */
 }
