@@ -3,31 +3,12 @@
 #include <stdlib.h>
 #define MAX_ELEMENTS 50
 
-
-
-
 /*
 * implement the graph as an adjacency list with weight field in a each node
 * input : pointer of adjList
 * output : pointer of resultAdjList
 * V(outputGraph) == V(inputGraph)
 * E(outputGraph) ∈ E(inputGraph)
-*/
-
-
-/*
-구현을 하고 전역변수를 줄이기
-구현 순서 
-* TODO : 
-isConnect
-inputGraph
-edgesort
-initializeOutputGraph
-KrukalsAlgorithm
-*DONE :
-main
-addEdge
-printGraph
 */
 
 
@@ -52,14 +33,15 @@ typedef struct _node {
 /* 0 : input graph, 1 : output graph */
 nodePointer arrAdjList[2][MAX_ELEMENTS] = { NULL, };
 /* use for examining that any cycle is created in the graph. */
-int arrResultVertexParent[MAX_ELEMENTS]; 
+int arrOutputVertexParent[MAX_ELEMENTS]; 
+int arrInputVertexParent[MAX_ELEMENTS];
 /* use for ascending sorting of edge weights */
 edge arrEdge[MAX_ELEMENTS * (MAX_ELEMENTS - 1)];
 
 
 /*	union the sets with roots i and j, i!=j, using the weighting rule. 
-	arrResultVertexParent[i]-count[i] and arrResultVertexParent[j] =-count[j]	*/
-void unionVertexTree(int, int);
+	arrOutputVertexParent[i]-count[i] and arrOutputVertexParent[j] =-count[j]	*/
+void unionVertexTree(int *,int, int);
 /*	find the root that including element i 
 	if(findElementRoot(i)==findElementRoot(j)) don't add edge(i,j) to tree T	*/
 int findElementRoot(int);
@@ -78,30 +60,35 @@ edge inputGraph();
 void printGraph(nodePointer*,int n);
 /* handle not integer exceptions and out of range exception. */
 int goodInput(int,int);
+/*	param : number of vertex of graph
+	return : 1 graph is connect */
 int isConnect(int);
 
 
 
 int main() {
 	edge n = inputGraph();
-	printf("input graph is \n");
+	printf("\ninput graph is \n\n");
 	printGraph(arrAdjList[0], n.head);
 	sortEdge(arrEdge, 0, n.tail-1);
 	KrusklsAlgorithm();
+	printf("\nthe minimum cost spanning tree of this graph is \n\n");
 	printGraph(arrAdjList[1], n.head);
 	return 0;
 }
 
-void unionVertexTree(int i, int j) 
+void unionVertexTree(int* arr, int i, int j) 
 {	
-	int temp = arrResultVertexParent[i] + arrResultVertexParent[j];
-	if (arrResultVertexParent[i] > arrResultVertexParent[j]) {
-		arrResultVertexParent[i] = j; /* make j the new root */
-		arrResultVertexParent[j] = temp;
-	}
-	else {
-		arrResultVertexParent[j] = i; /* make i the new root */
-		arrResultVertexParent[i] = temp;
+	if (i != j) {
+		int temp = arrOutputVertexParent[i] + arrOutputVertexParent[j];
+		if (arrOutputVertexParent[i] > arrOutputVertexParent[j]) {
+			arrOutputVertexParent[i] = j; /* make j the new root */
+			arrOutputVertexParent[j] = temp;
+		}
+		else {
+			arrOutputVertexParent[j] = i; /* make i the new root */
+			arrOutputVertexParent[i] = temp;
+		}
 	}
 }
 
@@ -109,10 +96,10 @@ void unionVertexTree(int i, int j)
 int findElementRoot(int i) 
 {	
 	int root, trail, lead;
-	for (root = i; arrResultVertexParent[root] >= 0; root = arrResultVertexParent[root]);
+	for (root = i; arrOutputVertexParent[root] >= 0; root = arrOutputVertexParent[root]);
 	for (trail = i; trail != root; trail = lead) {
-		lead = arrResultVertexParent[trail];
-		arrResultVertexParent[trail] = root;
+		lead = arrOutputVertexParent[trail];
+		arrOutputVertexParent[trail] = root;
 	}
 	return root;
 }
@@ -201,16 +188,9 @@ int addEdge(edge _edge, int x) {
 }
 
 void KrusklsAlgorithm() {
-	/*	
-	while(n(edge)<n(vertex)){
-	edge배열에서 하나 꺼내옴
-	cycle을 이루는지 검사
-	cycle을 이루지 않으면 T에 edge추가
-	}
-	*/
 	int nVertex=0;
 	int nEdge = 0;
-	for (; arrResultVertexParent[nVertex] == -1; nVertex++);
+	for (; arrOutputVertexParent[nVertex] == -1; nVertex++);
 	for (int i = 0; nEdge < nVertex-1;i++) {
 		edge temp;
 		temp = arrEdge[i];
@@ -218,7 +198,7 @@ void KrusklsAlgorithm() {
 		int rootHead = findElementRoot(temp.head);
 		int rootTail = findElementRoot(temp.tail);
 		if (!(rootHead == rootTail)) {
-			unionVertexTree(rootHead, rootTail);
+			unionVertexTree(arrOutputVertexParent, rootHead, rootTail);
 			addEdge(temp, 1);
 			nEdge++;
 		}
@@ -264,57 +244,41 @@ edge inputGraph() {
 	printf("input number of vertex>>");
 	n = goodInput(1, MAX_ELEMENTS);
 	returnEdge.head = n;
+	printf("\nNumber of vertices in graph : %d\n\n", n);
 	for (int i = 0; i < n; i++) {
-		arrResultVertexParent[i] = -1;
+		arrInputVertexParent[i] = -1;
+		arrOutputVertexParent[i] = -1;
 	}
-	/*for (int i = 0; i < n; i++) {
-		arrAdjList[0][i]=NULL;
-	}*/
-
-	/*
-	* input edges : tail, head and weight
-	* need an end signal (maybe enter -1 at first data)
-	* exceptions
-	*	input wrong tail
-	*		not integer
-	*		out of range(good range = [0,number of vertexes))
-	*	input wrong head
-	*		not integer
-	*		out of range(good range = [0,number of vertexes))
-	*		same with tail
-	*		already exsited
-	*	input wrong weight
-	*		not integer
-	*		out of range (good range = [0,∞))
-	*/
+	/* Input edge */
 	for (int i = 0;; i++) {
 		edge temp;
-		printf("Input tail of edge   >>");
+		printf("Input tail of edge	(enter -1 to end input)	>>");
 		temp.tail = goodInput(-1, MAX_ELEMENTS);
 		if (temp.tail == -1)
 			break;
-		printf("Input head of edge   >>");
+		printf("Input head of edge				>>");
 		temp.head = goodInput(0, MAX_ELEMENTS);
 		if (temp.head == temp.tail) {
 			printf("tail and head is same");
 			exit(EXIT_FAILURE);
 		}
-		printf("Input weight of edge >>");
+		printf("Input weight of edge				>>");
 		temp.weight = goodInput(0, 10000);
 		/* make adjecentList */
 		if (!addEdge(temp, 0)) {
 			printf("edge is already exist.");
 			exit(EXIT_FAILURE);
 		}
+		unionVertexTree(arrInputVertexParent, temp.head, temp.tail);
 		arrEdge[i] = temp;
 		returnEdge.tail = i+1;
-		printf("\ninput edge (%d,%d) weight : %d success!\n", temp.tail, temp.head, temp.weight);
+		printf("edge (%d,%d) weight : %d\n\n", temp.tail, temp.head, temp.weight);
 	}
 	
 	/*	exceptions
 	*		graph is not connected
 	*/
-	if (!isConnect(0)) {
+	if (!isConnect(n)) {
 		printf("graph is not connected.");
 		exit(EXIT_FAILURE);
 	}
@@ -339,20 +303,17 @@ void printGraph(nodePointer* _adjList,int n) {
 		}	
 		printf("\n");
 	}
+	printf("\n\n");
 }
 
 
-int isConnect(int x) {
-	/*	use find() 
-		made arrVertex*/
+int isConnect(int n) {
+	int cnt = 0;
+	for (int i = 0; i < n; i++) {
+		if (arrInputVertexParent[i] < 0)
+			cnt++;
+		if (cnt > 1)
+			return 0;
+	}
 	return 1;
-}
-
-void dfs(int v, int* visited){ 
-	/* depth first search of a graph beginning at v */
-	nodePointer w;
-	visited[v] = 1;
-//	for (w = graph[v]; w; w = w->link)
-	//	if (!visited[w->vertex])
-		//	dfs(w->vertex); /* recursion */
 }
