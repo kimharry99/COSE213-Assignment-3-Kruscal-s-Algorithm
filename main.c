@@ -19,7 +19,7 @@
 구현을 하고 전역변수를 줄이기
 구현 순서 
 * TODO : 
-addEdge
+isConnect
 inputGraph
 printGraph
 initializeOutputGraph
@@ -27,6 +27,7 @@ KrukalsAlgorithm
 edgesort
 *DONE :
 main
+addEdge
 */
 
 
@@ -75,10 +76,12 @@ void sortEdge();
 	return 1 : adding success, return 0 : adding failure */
 int addEdge(edge,int);
 void KrusklsAlgorithm();
-void inputGraph();
-void printGraph();
+/* return number of vertex */
+int inputGraph();
+void printGraph(nodePointer*,int n);
 /* handle not integer exceptions and out of range exception. */
 int goodInput(int,int);
+int isConnect(int);
 
 
 
@@ -89,8 +92,7 @@ int main() {
 	KrusklsAlgorithm();
 	printGraph();
 	*/
-
-	inputGraph();
+	printGraph(arrAdjList[0], inputGraph());
 	return 0;
 }
 
@@ -216,7 +218,7 @@ int goodInput(int rangeA, int rangeB) {
 	exit(EXIT_FAILURE);
 }
 
-void inputGraph() {
+int inputGraph() {
 	int n = 0;
 	/*
 	* input vertex : number of vertex >> 0~n
@@ -266,17 +268,44 @@ void inputGraph() {
 			printf("edge is already exist.");
 			exit(EXIT_FAILURE);
 		}
+	}
+	
+	/*	exceptions
+	*		graph is not connected
+	*/
+	if (!isConnect(0)) {
+		printf("graph is not connected.");
+		exit(EXIT_FAILURE);
+	}
+	return n;
+}
 
-		/*	exceptions
-		*		graph is not connected
-		*/
+void printGraph(nodePointer* _adjList,int n) {
+	nodePointer w;
+	printf("\n");
+	for (int i = 0; i < n; i++) {
+		if (_adjList[i]) {
+				printf("%d -> ",i);
+			for (w = _adjList[i]; w; w = w->link) {
+				printf("%d|%d ", w->vertex, w->weight);
+				if (w->link)
+					printf("-> ");
+			}
+		}
+		else
+		{
+			printf("%d", i);
+		}	
+		printf("\n");
 	}
 }
 
-void printGraph() {
 
+int isConnect(int x) {
+	/*	use find() 
+		made arrVertex*/
+	return 1;
 }
-
 
 void dfs(int v, int* visited){ 
 	/* depth first search of a graph beginning at v */
