@@ -43,7 +43,7 @@ edge arrEdge[MAX_ELEMENTS * (MAX_ELEMENTS - 1)];
 void unionVertexTree(int *,int, int);
 /*	find the root that including element i 
 	if(findElementRoot(i)==findElementRoot(j)) don't add edge(i,j) to tree T	*/
-int findElementRoot(int);
+int findElementRoot(int*,int);
 /* sort arrEdge in ascending order by the weight of the edges */
 void sortEdge(edge arr[], int left, int right);
 /*	add edge to graph arrAdjList[x].
@@ -64,7 +64,6 @@ int goodInput(int,int);
 int isConnect(int);
 
 
-
 int main() {
 	edge n = inputGraph();
 	printf("\ninput graph is \n\n");
@@ -79,25 +78,25 @@ int main() {
 void unionVertexTree(int* arr, int i, int j) 
 {	
 	if (i != j) {
-		int temp = arrOutputVertexParent[i] + arrOutputVertexParent[j];
-		if (arrOutputVertexParent[i] > arrOutputVertexParent[j]) {
-			arrOutputVertexParent[i] = j; /* make j the new root */
-			arrOutputVertexParent[j] = temp;
+		int temp = arr[i] + arr[j];
+		if (arr[i] > arr[j]) {
+			arr[i] = j; /* make j the new root */
+			arr[j] = temp;
 		}
 		else {
-			arrOutputVertexParent[j] = i; /* make i the new root */
-			arrOutputVertexParent[i] = temp;
+			arr[j] = i; /* make i the new root */
+			arr[i] = temp;
 		}
 	}
 }
 
-int findElementRoot(int i) 
+int findElementRoot(int *arr,int i) 
 {	
 	int root, trail, lead;
-	for (root = i; arrOutputVertexParent[root] >= 0; root = arrOutputVertexParent[root]);
+	for (root = i; arr[root] >= 0; root = arr[root]);
 	for (trail = i; trail != root; trail = lead) {
-		lead = arrOutputVertexParent[trail];
-		arrOutputVertexParent[trail] = root;
+		lead = arr[trail];
+		arr[trail] = root;
 	}
 	return root;
 }
@@ -192,8 +191,8 @@ void KrusklsAlgorithm() {
 		edge temp;
 		temp = arrEdge[i];
 		/* added edge don't make cycle */
-		int rootHead = findElementRoot(temp.head);
-		int rootTail = findElementRoot(temp.tail);
+		int rootHead = findElementRoot(arrOutputVertexParent, temp.head);
+		int rootTail = findElementRoot(arrOutputVertexParent, temp.tail);
 		if (!(rootHead == rootTail)) {
 			unionVertexTree(arrOutputVertexParent, rootHead, rootTail);
 			addEdge(temp, 1);
@@ -260,7 +259,9 @@ edge inputGraph() {
 			printf("edge is already exist.");
 			exit(EXIT_FAILURE);
 		}
-		unionVertexTree(arrInputVertexParent, temp.head, temp.tail);
+		int rootHead = findElementRoot(arrInputVertexParent, temp.head);
+		int rootTail = findElementRoot(arrInputVertexParent, temp.tail);
+		unionVertexTree(arrInputVertexParent, rootHead, rootTail);
 		arrEdge[i] = temp;
 		returnEdge.tail = i+1;
 		printf("edge (%d,%d) weight : %d\n\n", temp.tail, temp.head, temp.weight);
