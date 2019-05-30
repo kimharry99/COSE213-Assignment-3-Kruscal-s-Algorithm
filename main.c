@@ -52,7 +52,7 @@ typedef struct _node {
 /* 0 : input graph, 1 : output graph */
 nodePointer arrAdjList[2][MAX_ELEMENTS] = { NULL, };
 /* use for examining that any cycle is created in the graph. */
-int arrResultVertexParent[MAX_ELEMENTS] = { -1, }; 
+int arrResultVertexParent[MAX_ELEMENTS]; 
 /* use for ascending sorting of edge weights */
 edge arrEdge[MAX_ELEMENTS * (MAX_ELEMENTS - 1)];
 
@@ -63,13 +63,6 @@ void unionVertexTree(int, int);
 /*	find the root that including element i 
 	if(findElementRoot(i)==findElementRoot(j)) don't add edge(i,j) to tree T	*/
 int findElementRoot(int);
-/*	inialize output graph.
-	set numbers of elements in arrOutputAdjList equals to arrInputAdjList.
-	set links of elements of arrOutputAdjList[] null.	
-	save edge data to arrEdge.
-	modify arrResultVertexParent
-*/
-void initializeOutputGraph();
 /* sort arrEdge in ascending order by the weight of the edges */
 void sortEdge(edge arr[], int left, int right);
 /*	add edge to graph arrAdjList[x].
@@ -77,7 +70,10 @@ void sortEdge(edge arr[], int left, int right);
 int addEdge(edge,int);
 void KrusklsAlgorithm();
 /*	return edge.head = number of vertex 
-	edge.tail = number of edges	*/
+	edge.tail = number of edges
+	save edge data to arrEdge.
+	reset arrOutputVertexParent to -1
+*/
 edge inputGraph();
 void printGraph(nodePointer*,int n);
 /* handle not integer exceptions and out of range exception. */
@@ -87,21 +83,12 @@ int isConnect(int);
 
 
 int main() {
-	/*inputGraph();
-	initializeOutputGraph();
-	sortEdge();
-	KrusklsAlgorithm();
-	printGraph();
-	*/
 	edge n = inputGraph();
-	for (int i = 0; i < n.tail; i++) {
-		printf("%d",arrEdge[i].weight);
-	}
+	printf("input graph is \n");
+	printGraph(arrAdjList[0], n.head);
 	sortEdge(arrEdge, 0, n.tail-1);
-
-	for (int i = 0; i < n.tail; i++) {
-		printf("%d",arrEdge[i].weight);
-	}
+	KrusklsAlgorithm();
+	printGraph(arrAdjList[1], n.head);
 	return 0;
 }
 
@@ -130,9 +117,6 @@ int findElementRoot(int i)
 	return root;
 }
 
-void initializeOutputGraph() {
-
-}
 
 void sortEdge(edge arr[], int left, int right) {
 	int i = left, j = right;
@@ -224,6 +208,22 @@ void KrusklsAlgorithm() {
 	cycle을 이루지 않으면 T에 edge추가
 	}
 	*/
+	int nVertex=0;
+	int nEdge = 0;
+	for (; arrResultVertexParent[nVertex] == -1; nVertex++);
+	for (int i = 0; nEdge < nVertex-1;i++) {
+		edge temp;
+		temp = arrEdge[i];
+		/* added edge don't make cycle */
+		int rootHead = findElementRoot(temp.head);
+		int rootTail = findElementRoot(temp.tail);
+		if (!(rootHead == rootTail)) {
+			unionVertexTree(rootHead, rootTail);
+			addEdge(temp, 1);
+			nEdge++;
+		}
+	}
+
 }
 
 int goodInput(int rangeA, int rangeB) {
@@ -264,6 +264,9 @@ edge inputGraph() {
 	printf("input number of vertex>>");
 	n = goodInput(1, MAX_ELEMENTS);
 	returnEdge.head = n;
+	for (int i = 0; i < n; i++) {
+		arrResultVertexParent[i] = -1;
+	}
 	/*for (int i = 0; i < n; i++) {
 		arrAdjList[0][i]=NULL;
 	}*/
@@ -305,6 +308,7 @@ edge inputGraph() {
 		}
 		arrEdge[i] = temp;
 		returnEdge.tail = i+1;
+		printf("\ninput edge (%d,%d) weight : %d success!\n", temp.tail, temp.head, temp.weight);
 	}
 	
 	/*	exceptions
