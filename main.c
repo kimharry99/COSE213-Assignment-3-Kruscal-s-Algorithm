@@ -7,8 +7,6 @@
 * implement the graph as an adjacency list with weight field in a each node
 * input : pointer of adjList
 * output : pointer of resultAdjList
-* V(outputGraph) == V(inputGraph)
-* E(outputGraph) ¡ô E(inputGraph)
 */
 
 
@@ -38,6 +36,7 @@ int arrInputVertexParent[MAX_ELEMENTS];
 /* use for ascending sorting of edge weights */
 edge arrEdge[MAX_ELEMENTS * (MAX_ELEMENTS - 1)];
 
+/* functions */
 
 /*	union the sets with roots i and j, i!=j, using the weighting rule. 
 	arrOutputVertexParent[i]-count[i] and arrOutputVertexParent[j] =-count[j]	*/
@@ -92,7 +91,6 @@ void unionVertexTree(int* arr, int i, int j)
 	}
 }
 
-
 int findElementRoot(int i) 
 {	
 	int root, trail, lead;
@@ -103,7 +101,6 @@ int findElementRoot(int i)
 	}
 	return root;
 }
-
 
 void sortEdge(edge arr[], int left, int right) {
 	int i = left, j = right;
@@ -235,12 +232,6 @@ edge inputGraph() {
 	edge returnEdge;
 	returnEdge.weight = -1;
 	int n = 0;
-	/*
-	* input vertex : number of vertex >> 0~n
-	* exceptions :
-	*	not integer
-	*	out of range (good range = [1,MAX_ELEMENTS])
-	*/
 	printf("input number of vertex>>");
 	n = goodInput(1, MAX_ELEMENTS);
 	returnEdge.head = n;
@@ -274,10 +265,7 @@ edge inputGraph() {
 		returnEdge.tail = i+1;
 		printf("edge (%d,%d) weight : %d\n\n", temp.tail, temp.head, temp.weight);
 	}
-	
-	/*	exceptions
-	*		graph is not connected
-	*/
+
 	if (!isConnect(n)) {
 		printf("graph is not connected.");
 		exit(EXIT_FAILURE);
@@ -305,7 +293,6 @@ void printGraph(nodePointer* _adjList,int n) {
 	}
 	printf("\n\n");
 }
-
 
 int isConnect(int n) {
 	int cnt = 0;
