@@ -21,13 +21,13 @@
 * TODO : 
 isConnect
 inputGraph
-printGraph
+edgesort
 initializeOutputGraph
 KrukalsAlgorithm
-edgesort
 *DONE :
 main
 addEdge
+printGraph
 */
 
 
@@ -71,13 +71,14 @@ int findElementRoot(int);
 */
 void initializeOutputGraph();
 /* sort arrEdge in ascending order by the weight of the edges */
-void sortEdge();
-/*	add edge to output graph.
+void sortEdge(edge arr[], int left, int right);
+/*	add edge to graph arrAdjList[x].
 	return 1 : adding success, return 0 : adding failure */
 int addEdge(edge,int);
 void KrusklsAlgorithm();
-/* return number of vertex */
-int inputGraph();
+/*	return edge.head = number of vertex 
+	edge.tail = number of edges	*/
+edge inputGraph();
 void printGraph(nodePointer*,int n);
 /* handle not integer exceptions and out of range exception. */
 int goodInput(int,int);
@@ -92,7 +93,15 @@ int main() {
 	KrusklsAlgorithm();
 	printGraph();
 	*/
-	printGraph(arrAdjList[0], inputGraph());
+	edge n = inputGraph();
+	for (int i = 0; i < n.tail; i++) {
+		printf("%d",arrEdge[i].weight);
+	}
+	sortEdge(arrEdge, 0, n.tail-1);
+
+	for (int i = 0; i < n.tail; i++) {
+		printf("%d",arrEdge[i].weight);
+	}
 	return 0;
 }
 
@@ -125,8 +134,32 @@ void initializeOutputGraph() {
 
 }
 
-void sortEdge() {
+void sortEdge(edge arr[], int left, int right) {
+	int i = left, j = right;
+	  int pivot = arr[(left + right) / 2].weight;
+      edge temp;
+      do
+      {
+        while (arr[i].weight < pivot)
+            i++;
+        while (arr[j].weight > pivot)
+            j--;
+        if (i<= j)
+        {
+            temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+            i++;
+            j--;
+        }
+      } while (i<= j);
 
+    /* recursion */
+    if (left < j)
+        sortEdge(arr, left, j);
+
+    if (i < right)
+        sortEdge(arr, i, right);
 }
 
 int addEdge(edge _edge, int x) {
@@ -218,7 +251,9 @@ int goodInput(int rangeA, int rangeB) {
 	exit(EXIT_FAILURE);
 }
 
-int inputGraph() {
+edge inputGraph() {
+	edge returnEdge;
+	returnEdge.weight = -1;
 	int n = 0;
 	/*
 	* input vertex : number of vertex >> 0~n
@@ -228,6 +263,7 @@ int inputGraph() {
 	*/
 	printf("input number of vertex>>");
 	n = goodInput(1, MAX_ELEMENTS);
+	returnEdge.head = n;
 	/*for (int i = 0; i < n; i++) {
 		arrAdjList[0][i]=NULL;
 	}*/
@@ -248,8 +284,7 @@ int inputGraph() {
 	*		not integer
 	*		out of range (good range = [0,¡Ä))
 	*/
-
-	while (1) {
+	for (int i = 0;; i++) {
 		edge temp;
 		printf("Input tail of edge   >>");
 		temp.tail = goodInput(-1, MAX_ELEMENTS);
@@ -268,6 +303,8 @@ int inputGraph() {
 			printf("edge is already exist.");
 			exit(EXIT_FAILURE);
 		}
+		arrEdge[i] = temp;
+		returnEdge.tail = i+1;
 	}
 	
 	/*	exceptions
@@ -277,7 +314,7 @@ int inputGraph() {
 		printf("graph is not connected.");
 		exit(EXIT_FAILURE);
 	}
-	return n;
+	return returnEdge;
 }
 
 void printGraph(nodePointer* _adjList,int n) {
